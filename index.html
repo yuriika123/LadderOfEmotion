@@ -1,28 +1,134 @@
 <!DOCTYPE html>
-<html>
+<html lang="ja">
 <head>
     <meta charset="UTF-8">
-    <title>感情の記録</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="ポリヴェーガル理論に基づく感情記録アプリ">
+    <title>感情の記録 - Ladder of Emotion</title>
     <link rel="manifest" href="manifest.json">
     <link rel="stylesheet" href="style.css">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>😊</text></svg>">
 </head>
 <body>
-    <div class="ladder-container">
-        <h1>あなたの今の状態は？</h1>
-        <button class="ladder-button color-green" data-floor="9">腹足迷走神経系</button>
-        <button class="ladder-button color-green" data-floor="8">安全</button>
-        <button class="ladder-button color-green" data-floor="7">社会的</button>
-        <button class="ladder-button color-blue" data-floor="6">交感神経系</button>
-        <button class="ladder-button color-blue" data-floor="5">可動化</button>
-        <button class="ladder-button color-blue" data-floor="4">闘争/逃走</button>
-        <button class="ladder-button color-gray" data-floor="3">背足迷走神経系</button>
-        <button class="ladder-button color-gray" data-floor="2">不動化</button>
-        <button class="ladder-button color-gray" data-floor="1">シャットダウン</button>
+    <div class="app-container">
+        <header class="app-header">
+            <h1>😊 感情の記録</h1>
+            <p class="subtitle">あなたの今の状態を記録しましょう</p>
+        </header>
+
+        <main class="main-content">
+            <section class="ladder-section">
+                <div class="ladder-container">
+                    <div class="ladder-button color-green" data-floor="9" data-description="腹足迷走神経系 - 最も安全で安心な状態">
+                        <div class="button-content">
+                            <span class="floor-number">9</span>
+                            <span class="floor-title">腹足迷走神経系</span>
+                            <span class="floor-desc">最も安全で安心な状態</span>
+                        </div>
+                    </div>
+                    <div class="ladder-button color-green" data-floor="8" data-description="安全 - 安心感があり、リラックスしている">
+                        <div class="button-content">
+                            <span class="floor-number">8</span>
+                            <span class="floor-title">安全</span>
+                            <span class="floor-desc">安心感があり、リラックスしている</span>
+                        </div>
+                    </div>
+                    <div class="ladder-button color-green" data-floor="7" data-description="社会的 - 人との繋がりを感じている">
+                        <div class="button-content">
+                            <span class="floor-number">7</span>
+                            <span class="floor-title">社会的</span>
+                            <span class="floor-desc">人との繋がりを感じている</span>
+                        </div>
+                    </div>
+                    <div class="ladder-button color-blue" data-floor="6" data-description="交感神経系 - 活発でエネルギッシュ">
+                        <div class="button-content">
+                            <span class="floor-number">6</span>
+                            <span class="floor-title">交感神経系</span>
+                            <span class="floor-desc">活発でエネルギッシュ</span>
+                        </div>
+                    </div>
+                    <div class="ladder-button color-blue" data-floor="5" data-description="可動化 - 行動的で動き回りたい">
+                        <div class="button-content">
+                            <span class="floor-number">5</span>
+                            <span class="floor-title">可動化</span>
+                            <span class="floor-desc">行動的で動き回りたい</span>
+                        </div>
+                    </div>
+                    <div class="ladder-button color-blue" data-floor="4" data-description="闘争/逃走 - 緊張や不安を感じている">
+                        <div class="button-content">
+                            <span class="floor-number">4</span>
+                            <span class="floor-title">闘争/逃走</span>
+                            <span class="floor-desc">緊張や不安を感じている</span>
+                        </div>
+                    </div>
+                    <div class="ladder-button color-gray" data-floor="3" data-description="背足迷走神経系 - 無気力でやる気がない">
+                        <div class="button-content">
+                            <span class="floor-number">3</span>
+                            <span class="floor-title">背足迷走神経系</span>
+                            <span class="floor-desc">無気力でやる気がない</span>
+                        </div>
+                    </div>
+                    <div class="ladder-button color-gray" data-floor="2" data-description="不動化 - 動けずにいる状態">
+                        <div class="button-content">
+                            <span class="floor-number">2</span>
+                            <span class="floor-title">不動化</span>
+                            <span class="floor-desc">動けずにいる状態</span>
+                        </div>
+                    </div>
+                    <div class="ladder-button color-gray" data-floor="1" data-description="シャットダウン - 完全に閉じこもった状態">
+                        <div class="button-content">
+                            <span class="floor-number">1</span>
+                            <span class="floor-title">シャットダウン</span>
+                            <span class="floor-desc">完全に閉じこもった状態</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="stats-section">
+                <h2>📊 統計</h2>
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-number" id="total-records">0</div>
+                        <div class="stat-label">総記録数</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number" id="today-records">0</div>
+                        <div class="stat-label">今日の記録</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number" id="avg-floor">-</div>
+                        <div class="stat-label">平均階数</div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="history-section">
+                <div class="history-header">
+                    <h2>📝 記録履歴</h2>
+                    <div class="history-controls">
+                        <button id="export-btn" class="control-btn">📤 エクスポート</button>
+                        <button id="clear-btn" class="control-btn danger">🗑️ クリア</button>
+                    </div>
+                </div>
+                <div class="search-container">
+                    <input type="text" id="search-input" placeholder="日付や階数で検索..." class="search-input">
+                </div>
+                <div id="history-list" class="history-list"></div>
+            </section>
+        </main>
     </div>
 
-    <div class="history-container">
-        <h2>記録履歴</h2>
-        <div id="history-list"></div>
+    <!-- モーダル -->
+    <div id="modal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h3 id="modal-title">記録完了</h3>
+            <p id="modal-message"></p>
+            <div class="modal-actions">
+                <button id="modal-ok" class="btn-primary">OK</button>
+            </div>
+        </div>
     </div>
 
     <script>
@@ -30,88 +136,265 @@
             navigator.serviceWorker.register('sw.js')
                 .then(function() {
                     console.log('サービスワーカーの登録が完了しました');
+                })
+                .catch(function(error) {
+                    console.log('サービスワーカーの登録に失敗しました:', error);
                 });
         }
     </script>
 
     <script>
-        // 記録を保存するための配列
-        let records = [];
-        
-        // すべてのボタン要素を取得する
-        const buttons = document.querySelectorAll('.ladder-button');
-        // 履歴を表示するための要素を取得する
-        const historyList = document.getElementById('history-list');
+        // アプリケーションの状態管理
+        class EmotionApp {
+            constructor() {
+                this.records = [];
+                this.filteredRecords = [];
+                this.init();
+            }
 
-        // --- 1. データの読み込み処理 ---
-        // ページが読み込まれたときに、localStorageからデータを復元する
-        const savedRecords = localStorage.getItem('emotion-records');
-        if (savedRecords) {
-            // 文字列から配列に戻し、日付もDateオブジェクトに変換する
-            records = JSON.parse(savedRecords).map(record => {
-                record.timestamp = new Date(record.timestamp);
-                return record;
-            });
-        }
+            init() {
+                this.loadData();
+                this.setupEventListeners();
+                this.updateUI();
+            }
 
-        // --- 記録履歴の表示を更新する関数（変更なし） ---
-        function updateHistoryView() {
-            // 履歴リストをクリアする
-            historyList.innerHTML = '';
+            loadData() {
+                const savedRecords = localStorage.getItem('emotion-records');
+                if (savedRecords) {
+                    this.records = JSON.parse(savedRecords).map(record => {
+                        record.timestamp = new Date(record.timestamp);
+                        return record;
+                    });
+                }
+                this.filteredRecords = [...this.records];
+            }
 
-            // 各記録を表示する
-            records.forEach(record => {
-                // 新しいdiv要素を作成
-                const recordElement = document.createElement('div');
-                // 作成したdivにCSS用のクラス名を追加
-                recordElement.classList.add('history-item');
+            saveData() {
+                localStorage.setItem('emotion-records', JSON.stringify(this.records));
+            }
 
-                // 表示する日付をフォーマットする
-                const formattedDate = new Intl.DateTimeFormat('ja-JP', {
-                    year: 'numeric',
-                    month: 'long',
-                    day: 'numeric',
-                    hour: '2-digit',
-                    minute: '2-digit'
-                }).format(record.timestamp);
+            setupEventListeners() {
+                // ラダーボタンのイベント
+                document.querySelectorAll('.ladder-button').forEach(button => {
+                    button.addEventListener('click', (e) => this.handleLadderClick(e));
+                    button.addEventListener('keydown', (e) => {
+                        if (e.key === 'Enter' || e.key === ' ') {
+                            e.preventDefault();
+                            this.handleLadderClick(e);
+                        }
+                    });
+                });
 
-                // divの中身のHTMLを設定
-                recordElement.innerHTML = `
-                    <span class="history-floor">${record.floor}階</span>
-                    <span class="history-time">${formattedDate}</span>
-                `;
+                // 検索機能
+                document.getElementById('search-input').addEventListener('input', (e) => {
+                    this.filterRecords(e.target.value);
+                });
 
-                // 履歴リストに新しいdiv要素を追加
-                historyList.appendChild(recordElement);
-            });
-        }
-        
-        // 各ボタンにクリックイベントを設定する
-        buttons.forEach(button => {
-            button.addEventListener('click', () => {
-                // ボタンから階数(floor)を取得する（文字列なので数値に変換）
-                const getFloor = parseInt(button.dataset.floor, 10);
+                // エクスポート機能
+                document.getElementById('export-btn').addEventListener('click', () => {
+                    this.exportData();
+                });
 
-                //　新しい記録を作成する
+                // クリア機能
+                document.getElementById('clear-btn').addEventListener('click', () => {
+                    this.showConfirmDialog();
+                });
+
+                // モーダル
+                document.querySelector('.close').addEventListener('click', () => {
+                    this.hideModal();
+                });
+
+                document.getElementById('modal-ok').addEventListener('click', () => {
+                    this.hideModal();
+                });
+
+                // モーダル外クリックで閉じる
+                window.addEventListener('click', (e) => {
+                    const modal = document.getElementById('modal');
+                    if (e.target === modal) {
+                        this.hideModal();
+                    }
+                });
+            }
+
+            handleLadderClick(event) {
+                const button = event.currentTarget;
+                const floor = parseInt(button.dataset.floor, 10);
+                const description = button.dataset.description;
+
                 const newRecord = {
-                    floor: getFloor,
-                    timestamp: new Date()
+                    floor: floor,
+                    timestamp: new Date(),
+                    description: description
+                };
+
+                this.records.unshift(newRecord); // 新しい記録を先頭に追加
+                this.filteredRecords.unshift(newRecord);
+                this.saveData();
+                this.updateUI();
+
+                // 成功メッセージを表示
+                this.showModal(
+                    '記録完了',
+                    `${floor}階「${description.split(' - ')[0]}」を記録しました。`
+                );
+
+                // ボタンのアニメーション
+                button.classList.add('clicked');
+                setTimeout(() => {
+                    button.classList.remove('clicked');
+                }, 200);
+            }
+
+            filterRecords(searchTerm) {
+                if (!searchTerm.trim()) {
+                    this.filteredRecords = [...this.records];
+                } else {
+                    this.filteredRecords = this.records.filter(record => {
+                        const dateStr = record.timestamp.toLocaleDateString('ja-JP');
+                        const timeStr = record.timestamp.toLocaleTimeString('ja-JP');
+                        const floorStr = record.floor.toString();
+                        const descStr = record.description || '';
+                        
+                        return dateStr.includes(searchTerm) || 
+                               timeStr.includes(searchTerm) || 
+                               floorStr.includes(searchTerm) ||
+                               descStr.toLowerCase().includes(searchTerm.toLowerCase());
+                    });
+                }
+                this.updateHistoryView();
+            }
+
+            updateUI() {
+                this.updateStats();
+                this.updateHistoryView();
+            }
+
+            updateStats() {
+                const totalRecords = this.records.length;
+                const today = new Date().toDateString();
+                const todayRecords = this.records.filter(record => 
+                    record.timestamp.toDateString() === today
+                ).length;
+
+                let avgFloor = '-';
+                if (totalRecords > 0) {
+                    const sum = this.records.reduce((acc, record) => acc + record.floor, 0);
+                    avgFloor = (sum / totalRecords).toFixed(1);
                 }
 
-                // 記録を配列に追加する
-                records.push(newRecord);
+                document.getElementById('total-records').textContent = totalRecords;
+                document.getElementById('today-records').textContent = todayRecords;
+                document.getElementById('avg-floor').textContent = avgFloor;
+            }
 
-                // --- 2. データの保存処理 ---
-                // records配列をJSON文字列に変換してlocalStorageに保存
-                localStorage.setItem('emotion-records', JSON.stringify(records));
+            updateHistoryView() {
+                const historyList = document.getElementById('history-list');
+                historyList.innerHTML = '';
 
-                // 配列が追加されたかコンソールで確認する
-                console.log('記録が追加されました', records);
-                alert(`${getFloor}階の記録が追加されました。`);
+                if (this.filteredRecords.length === 0) {
+                    historyList.innerHTML = '<div class="no-records">記録がありません</div>';
+                    return;
+                }
 
-                // ★記録が追加されたら、履歴表示を更新する
-                updateHistoryView();
-            });
+                this.filteredRecords.forEach(record => {
+                    const recordElement = document.createElement('div');
+                    recordElement.classList.add('history-item');
+                    
+                    const formattedDate = new Intl.DateTimeFormat('ja-JP', {
+                        year: 'numeric',
+                        month: 'long',
+                        day: 'numeric',
+                        hour: '2-digit',
+                        minute: '2-digit'
+                    }).format(record.timestamp);
+
+                    const floorClass = this.getFloorClass(record.floor);
+
+                    recordElement.innerHTML = `
+                        <div class="history-info">
+                            <div class="history-floor ${floorClass}">${record.floor}階</div>
+                            <div class="history-description">${record.description || ''}</div>
+                        </div>
+                        <div class="history-time">${formattedDate}</div>
+                    `;
+
+                    historyList.appendChild(recordElement);
+                });
+            }
+
+            getFloorClass(floor) {
+                if (floor >= 7) return 'floor-green';
+                if (floor >= 4) return 'floor-blue';
+                return 'floor-gray';
+            }
+
+            exportData() {
+                const data = {
+                    records: this.records,
+                    exportDate: new Date().toISOString(),
+                    totalRecords: this.records.length
+                };
+
+                const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `emotion-records-${new Date().toISOString().split('T')[0]}.json`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+
+                this.showModal('エクスポート完了', 'データをエクスポートしました。');
+            }
+
+            showConfirmDialog() {
+                this.showModal(
+                    '確認',
+                    'すべての記録を削除しますか？この操作は取り消せません。',
+                    true
+                );
+            }
+
+            clearAllRecords() {
+                this.records = [];
+                this.filteredRecords = [];
+                this.saveData();
+                this.updateUI();
+                this.showModal('削除完了', 'すべての記録を削除しました。');
+            }
+
+            showModal(title, message, isConfirm = false) {
+                document.getElementById('modal-title').textContent = title;
+                document.getElementById('modal-message').textContent = message;
+                
+                const okButton = document.getElementById('modal-ok');
+                if (isConfirm) {
+                    okButton.textContent = '削除する';
+                    okButton.className = 'btn-danger';
+                    okButton.onclick = () => {
+                        this.clearAllRecords();
+                        this.hideModal();
+                    };
+                } else {
+                    okButton.textContent = 'OK';
+                    okButton.className = 'btn-primary';
+                    okButton.onclick = () => this.hideModal();
+                }
+
+                document.getElementById('modal').style.display = 'block';
+            }
+
+            hideModal() {
+                document.getElementById('modal').style.display = 'none';
+            }
+        }
+
+        // アプリケーションを初期化
+        document.addEventListener('DOMContentLoaded', () => {
+            new EmotionApp();
         });
     </script>
 </body>

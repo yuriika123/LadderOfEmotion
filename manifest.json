@@ -1,12 +1,28 @@
 {
-    "name": "はじめてのアプリ",
-    "short_name": "初アプリ",
+    "name": "感情の記録 - Ladder of Emotion",
+    "short_name": "感情記録",
+    "description": "ポリヴェーガル理論に基づく感情記録アプリ",
     "display": "standalone",
+    "orientation": "portrait",
+    "theme_color": "#6366f1",
+    "background_color": "#667eea",
+    "start_url": "/",
+    "scope": "/",
     "icons": [
         {
-            "src": "https://placehold.co/192x192.png",
+            "src": "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTkyIiBoZWlnaHQ9IjE5MiIgdmlld0JveD0iMCAwIDE5MiAxOTIiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIxOTIiIGhlaWdodD0iMTkyIiByeD0iMjQiIGZpbGw9IiM2MzY2ZjEiLz4KPGNpcmNsZSBjeD0iOTYiIGN5PSI5NiIgcj0iNDgiIGZpbGw9IndoaXRlIi8+CjxwYXRoIGQ9Ik05NiA2NEM4OC4yNCA2NCA4MiA3MC4yNCA4MiA3OEM4MiA4NS43NiA4OC4yNCA5MiA5NiA5MkMxMDMuNzYgOTIgMTEwIDg1Ljc2IDExMCA3OEMxMTAgNzAuMjQgMTAzLjc2IDY0IDk2IDY0WiIgZmlsbD0iIzYzNjZmMSIvPjxwYXRoIGQ9Ik03OCA5OEM3OCA5OCA4MiAxMDIgOTYgMTAyQzExMCAxMDIgMTE0IDk4IDExNCA5OCIgc3Ryb2tlPSIjNjM2NmYxIiBzdHJva2Utd2lkdGg9IjQiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIvPgo8L3N2Zz4K",
             "sizes": "192x192",
-            "type": "image/png"
+            "type": "image/svg+xml",
+            "purpose": "any maskable"
+        },
+        {
+            "src": "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNTEyIiBoZWlnaHQ9IjUxMiIgdmlld0JveD0iMCAwIDUxMiA1MTIiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSI1MTIiIGhlaWdodD0iNTEyIiByeD0iNjQiIGZpbGw9IiM2MzY2ZjEiLz4KPGNpcmNsZSBjeD0iMjU2IiBjeT0iMjU2IiByPSIxMjgiIGZpbGw9IndoaXRlIi8+CjxwYXRoIGQ9Ik0yNTYgMTcwLjY2N0MyMzUuNDY3IDE3MC42NjcgMjE4LjY2NyAxODcuNDY3IDIxOC42NjcgMjA4QzIxOC42NjcgMjI4LjUzMyAyMzUuNDY3IDI0NS4zMzMgMjU2IDI0NS4zMzNDMjc2LjUzMyAyNDUuMzMzIDI5My4zMzMgMjI4LjUzMyAyOTMuMzMzIDIwOEMyOTMuMzMzIDE4Ny40NjcgMjc2LjUzMyAxNzAuNjY3IDI1NiAxNzAuNjY3WiIgZmlsbD0iIzYzNjZmMSIvPjxwYXRoIGQ9Ik0yMDguNjY3IDI2MS4zMzNDMjA4LjY2NyAyNjEuMzMzIDIxOC42NjcgMjcyIDI1NiAyNzJDMjkzLjMzMyAyNzIgMzAzLjMzMyAyNjEuMzMzIDMwMy4zMzMgMjYxLjMzMyIgc3Ryb2tlPSIjNjM2NmYxIiBzdHJva2Utd2lkdGg9IjEwLjY2NyIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIi8+Cjwvc3ZnPgo=",
+            "sizes": "512x512",
+            "type": "image/svg+xml",
+            "purpose": "any maskable"
         }
-    ]
+    ],
+    "categories": ["health", "lifestyle", "productivity"],
+    "lang": "ja",
+    "dir": "ltr"
 }
