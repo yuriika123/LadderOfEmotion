@@ -253,6 +253,13 @@ section h2 {
     transition: var(--transition);
     background: var(--gray-100);
     color: var(--gray-700);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+    user-select: none;
+    -webkit-user-select: none;
+    -webkit-touch-callout: none;
 }
 
 .control-btn:hover {
@@ -515,6 +522,18 @@ section h2 {
     
     .history-controls {
         justify-content: center;
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+    
+    .control-btn {
+        padding: 12px 20px;
+        font-size: 1rem;
+        min-height: 44px;
+        min-width: 44px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
     }
     
     .history-item {
@@ -567,6 +586,19 @@ section h2 {
     
     .floor-desc {
         font-size: 0.8rem;
+    }
+    
+    .history-controls {
+        flex-direction: column;
+        width: 100%;
+    }
+    
+    .control-btn {
+        width: 100%;
+        padding: 16px 20px;
+        font-size: 1.1rem;
+        min-height: 48px;
+        justify-content: center;
     }
 }
 

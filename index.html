@@ -409,12 +409,21 @@
                 const a = document.createElement('a');
                 a.href = url;
                 a.download = `emotion-records-${new Date().toISOString().split('T')[0]}.json`;
-                document.body.appendChild(a);
-                a.click();
-                document.body.removeChild(a);
+                
+                // iOS Safari対応
+                if (navigator.userAgent.match(/iPad|iPhone|iPod/)) {
+                    // iOS Safariでは新しいタブで開く
+                    window.open(url, '_blank');
+                    this.showModal('エクスポート完了', 'データを新しいタブで開きました。手動でダウンロードしてください。');
+                } else {
+                    // その他のブラウザでは通常通りダウンロード
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                    this.showModal('エクスポート完了', 'データをエクスポートしました。');
+                }
+                
                 URL.revokeObjectURL(url);
-
-                this.showModal('エクスポート完了', 'データをエクスポートしました。');
             }
 
             showGraphModal() {
@@ -571,12 +580,21 @@
                         const a = document.createElement('a');
                         a.href = url;
                         a.download = filename;
-                        document.body.appendChild(a);
-                        a.click();
-                        document.body.removeChild(a);
-                        URL.revokeObjectURL(url);
                         
-                        this.showModal('ダウンロード完了', 'グラフ画像をダウンロードしました。');
+                        // iOS Safari対応
+                        if (navigator.userAgent.match(/iPad|iPhone|iPod/)) {
+                            // iOS Safariでは新しいタブで開く
+                            window.open(url, '_blank');
+                            this.showModal('ダウンロード完了', 'グラフ画像を新しいタブで開きました。手動で保存してください。');
+                        } else {
+                            // その他のブラウザでは通常通りダウンロード
+                            document.body.appendChild(a);
+                            a.click();
+                            document.body.removeChild(a);
+                            this.showModal('ダウンロード完了', 'グラフ画像をダウンロードしました。');
+                        }
+                        
+                        URL.revokeObjectURL(url);
                     });
                 });
             }
