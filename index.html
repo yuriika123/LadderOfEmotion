@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>感情の記録</title>
+    <link rel="manifest" href="manifest.json">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="ladder-container">
+        <h1>あなたの今の状態は？</h1>
+        <button class="ladder-button color-green" data-floor="9">腹足迷走神経系</button>
+        <button class="ladder-button color-green" data-floor="8">安全</button>
+        <button class="ladder-button color-green" data-floor="7">社会的</button>
+        <button class="ladder-button color-blue" data-floor="6">交感神経系</button>
+        <button class="ladder-button color-blue" data-floor="5">可動化</button>
+        <button class="ladder-button color-blue" data-floor="4">闘争/逃走</button>
+        <button class="ladder-button color-gray" data-floor="3">背足迷走神経系</button>
+        <button class="ladder-button color-gray" data-floor="2">不動化</button>
+        <button class="ladder-button color-gray" data-floor="1">シャットダウン</button>
+    </div>
+
+    <div class="history-container">
+        <h2>記録履歴</h2>
+        <div id="history-list"></div>
+    </div>
+
+    <script>
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('sw.js')
+                .then(function() {
+                    console.log('サービスワーカーの登録が完了しました');
+                });
+        }
+    </script>
+
+    <script>
+        // 記録を保存するための配列
+        let records = [];
+        
+        // すべてのボタン要素を取得する
+        const buttons = document.querySelectorAll('.ladder-button');
+        // 履歴を表示するための要素を取得する
+        const historyList = document.getElementById('history-list');
+
+        // --- 1. データの読み込み処理 ---
+        // ページが読み込まれたときに、localStorageからデータを復元する
+        const savedRecords = localStorage.getItem('emotion-records');
+        if (savedRecords) {
+            // 文字列から配列に戻し、日付もDateオブジェクトに変換する
+            records = JSON.parse(savedRecords).map(record => {
+                record.timestamp = new Date(record.timestamp);
+                return record;
+            });
+        }
+
+        // --- 記録履歴の表示を更新する関数（変更なし） ---
+        function updateHistoryView() {
+            // 履歴リストをクリアする
+            historyList.innerHTML = '';
+
+            // 各記録を表示する
+            records.forEach(record => {
+                // 新しいdiv要素を作成
+                const recordElement = document.createElement('div');
+                // 作成したdivにCSS用のクラス名を追加
+                recordElement.classList.add('history-item');
+
+                // 表示する日付をフォーマットする
+                const formattedDate = new Intl.DateTimeFormat('ja-JP', {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                }).format(record.timestamp);
+
+                // divの中身のHTMLを設定
+                recordElement.innerHTML = `
+                    <span class="history-floor">${record.floor}階</span>
+                    <span class="history-time">${formattedDate}</span>
+                `;
+
+                // 履歴リストに新しいdiv要素を追加
+                historyList.appendChild(recordElement);
+            });
+        }
+        
+        // 各ボタンにクリックイベントを設定する
+        buttons.forEach(button => {
+            button.addEventListener('click', () => {
+                // ボタンから階数(floor)を取得する（文字列なので数値に変換）
+                const getFloor = parseInt(button.dataset.floor, 10);
+
+                //　新しい記録を作成する
+                const newRecord = {
+                    floor: getFloor,
+                    timestamp: new Date()
+                }
+
+                // 記録を配列に追加する
+                records.push(newRecord);
+
+                // --- 2. データの保存処理 ---
+                // records配列をJSON文字列に変換してlocalStorageに保存
+                localStorage.setItem('emotion-records', JSON.stringify(records));
+
+                // 配列が追加されたかコンソールで確認する
+                console.log('記録が追加されました', records);
+                alert(`${getFloor}階の記録が追加されました。`);
+
+                // ★記録が追加されたら、履歴表示を更新する
+                updateHistoryView();
+            });
+        });
+    </script>
+</body>
+</html>
