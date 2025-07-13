@@ -634,3 +634,159 @@ input:focus {
         border-color: var(--gray-600);
     }
 }
+
+/* グラフモーダルスタイル */
+.graph-modal-content {
+    max-width: 900px;
+    width: 90%;
+    max-height: 90vh;
+    overflow-y: auto;
+}
+
+.date-range-container {
+    display: flex;
+    gap: 20px;
+    margin-bottom: 24px;
+    flex-wrap: wrap;
+}
+
+.date-input-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    flex: 1;
+    min-width: 200px;
+}
+
+.date-input-group label {
+    font-weight: 500;
+    color: var(--gray-700);
+    font-size: 0.9rem;
+}
+
+.date-input {
+    padding: 10px 12px;
+    border: 2px solid var(--gray-200);
+    border-radius: var(--border-radius-sm);
+    font-size: 0.9rem;
+    transition: var(--transition);
+    background: white;
+}
+
+.date-input:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+}
+
+.graph-container {
+    background: white;
+    border-radius: var(--border-radius-sm);
+    padding: 20px;
+    margin-bottom: 24px;
+    border: 1px solid var(--gray-200);
+    position: relative;
+    min-height: 400px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.graph-container canvas {
+    max-width: 100%;
+    height: auto;
+}
+
+.btn-secondary {
+    padding: 10px 20px;
+    border: 2px solid var(--gray-300);
+    border-radius: var(--border-radius-sm);
+    font-size: 0.9rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: var(--transition);
+    background: white;
+    color: var(--gray-700);
+}
+
+.btn-secondary:hover {
+    background: var(--gray-50);
+    border-color: var(--gray-400);
+    transform: translateY(-1px);
+}
+
+/* グラフモーダルのレスポンシブ対応 */
+@media (max-width: 768px) {
+    .graph-modal-content {
+        width: 95%;
+        margin: 5% auto;
+        padding: 20px;
+    }
+    
+    .date-range-container {
+        flex-direction: column;
+        gap: 16px;
+    }
+    
+    .date-input-group {
+        min-width: auto;
+    }
+    
+    .graph-container {
+        padding: 16px;
+        min-height: 300px;
+    }
+    
+    .modal-actions {
+        flex-direction: column;
+        gap: 8px;
+    }
+    
+    .modal-actions button {
+        width: 100%;
+    }
+}
+
+@media (max-width: 480px) {
+    .graph-modal-content {
+        padding: 16px;
+    }
+    
+    .graph-container {
+        padding: 12px;
+        min-height: 250px;
+    }
+}
+
+/* ダークモードでのグラフモーダル */
+@media (prefers-color-scheme: dark) {
+    .date-input {
+        background: var(--gray-700);
+        border-color: var(--gray-600);
+        color: var(--gray-100);
+    }
+    
+    .date-input:focus {
+        border-color: var(--primary-color);
+    }
+    
+    .date-input-group label {
+        color: var(--gray-300);
+    }
+    
+    .graph-container {
+        background: var(--gray-700);
+        border-color: var(--gray-600);
+    }
+    
+    .btn-secondary {
+        background: var(--gray-700);
+        border-color: var(--gray-600);
+        color: var(--gray-100);
+    }
+    
+    .btn-secondary:hover {
+        background: var(--gray-600);
+        border-color: var(--gray-500);
+    }
+}

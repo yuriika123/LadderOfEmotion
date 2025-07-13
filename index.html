@@ -8,6 +8,10 @@
     <link rel="manifest" href="manifest.json">
     <link rel="stylesheet" href="style.css">
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>😊</text></svg>">
+    <!-- Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- html2canvas CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
 </head>
 <body>
     <div class="app-container">
@@ -108,6 +112,7 @@
                     <h2>📝 記録履歴</h2>
                     <div class="history-controls">
                         <button id="export-btn" class="control-btn">📤 エクスポート</button>
+                        <button id="graph-export-btn" class="control-btn">📊 グラフ出力</button>
                         <button id="clear-btn" class="control-btn danger">🗑️ クリア</button>
                     </div>
                 </div>
@@ -117,6 +122,32 @@
                 <div id="history-list" class="history-list"></div>
             </section>
         </main>
+    </div>
+
+    <!-- グラフエクスポートモーダル -->
+    <div id="graph-modal" class="modal">
+        <div class="modal-content graph-modal-content">
+            <span class="close" id="graph-modal-close">&times;</span>
+            <h3>📊 グラフ出力</h3>
+            <div class="date-range-container">
+                <div class="date-input-group">
+                    <label for="start-date">開始日:</label>
+                    <input type="date" id="start-date" class="date-input">
+                </div>
+                <div class="date-input-group">
+                    <label for="end-date">終了日:</label>
+                    <input type="date" id="end-date" class="date-input">
+                </div>
+            </div>
+            <div class="graph-container" id="graph-container">
+                <canvas id="emotion-chart" width="800" height="400"></canvas>
+            </div>
+            <div class="modal-actions">
+                <button id="generate-graph-btn" class="btn-primary">グラフ生成</button>
+                <button id="download-graph-btn" class="btn-secondary" style="display: none;">画像ダウンロード</button>
+                <button id="graph-modal-cancel" class="btn-secondary">キャンセル</button>
+            </div>
+        </div>
     </div>
 
     <!-- モーダル -->
@@ -149,6 +180,7 @@
             constructor() {
                 this.records = [];
                 this.filteredRecords = [];
+                this.chart = null;
                 this.init();
             }
 
@@ -156,6 +188,7 @@
                 this.loadData();
                 this.setupEventListeners();
                 this.updateUI();
+                this.setDefaultDates();
             }
 
             loadData() {
@@ -171,6 +204,14 @@
 
             saveData() {
                 localStorage.setItem('emotion-records', JSON.stringify(this.records));
+            }
+
+            setDefaultDates() {
+                const today = new Date();
+                const oneWeekAgo = new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000);
+                
+                document.getElementById('end-date').value = today.toISOString().split('T')[0];
+                document.getElementById('start-date').value = oneWeekAgo.toISOString().split('T')[0];
             }
 
             setupEventListeners() {
@@ -195,9 +236,31 @@
                     this.exportData();
                 });
 
+                // グラフエクスポート機能
+                document.getElementById('graph-export-btn').addEventListener('click', () => {
+                    this.showGraphModal();
+                });
+
                 // クリア機能
                 document.getElementById('clear-btn').addEventListener('click', () => {
                     this.showConfirmDialog();
+                });
+
+                // グラフモーダル関連
+                document.getElementById('graph-modal-close').addEventListener('click', () => {
+                    this.hideGraphModal();
+                });
+
+                document.getElementById('graph-modal-cancel').addEventListener('click', () => {
+                    this.hideGraphModal();
+                });
+
+                document.getElementById('generate-graph-btn').addEventListener('click', () => {
+                    this.generateGraph();
+                });
+
+                document.getElementById('download-graph-btn').addEventListener('click', () => {
+                    this.downloadGraph();
                 });
 
                 // モーダル
@@ -212,8 +275,12 @@
                 // モーダル外クリックで閉じる
                 window.addEventListener('click', (e) => {
                     const modal = document.getElementById('modal');
+                    const graphModal = document.getElementById('graph-modal');
                     if (e.target === modal) {
                         this.hideModal();
+                    }
+                    if (e.target === graphModal) {
+                        this.hideGraphModal();
                     }
                 });
             }
@@ -348,6 +415,170 @@
                 URL.revokeObjectURL(url);
 
                 this.showModal('エクスポート完了', 'データをエクスポートしました。');
+            }
+
+            showGraphModal() {
+                document.getElementById('graph-modal').style.display = 'block';
+                this.setDefaultDates();
+            }
+
+            hideGraphModal() {
+                document.getElementById('graph-modal').style.display = 'none';
+                if (this.chart) {
+                    this.chart.destroy();
+                    this.chart = null;
+                }
+                document.getElementById('download-graph-btn').style.display = 'none';
+            }
+
+            generateGraph() {
+                const startDate = new Date(document.getElementById('start-date').value);
+                const endDate = new Date(document.getElementById('end-date').value);
+                
+                if (startDate > endDate) {
+                    this.showModal('エラー', '開始日は終了日より前の日付を選択してください。');
+                    return;
+                }
+
+                // 日付範囲内の記録をフィルタリング
+                const filteredRecords = this.records.filter(record => {
+                    const recordDate = new Date(record.timestamp);
+                    return recordDate >= startDate && recordDate <= endDate;
+                });
+
+                if (filteredRecords.length === 0) {
+                    this.showModal('エラー', '指定された期間に記録がありません。');
+                    return;
+                }
+
+                // 日付ごとに記録をグループ化
+                const recordsByDate = {};
+                filteredRecords.forEach(record => {
+                    const dateStr = record.timestamp.toISOString().split('T')[0];
+                    if (!recordsByDate[dateStr]) {
+                        recordsByDate[dateStr] = [];
+                    }
+                    recordsByDate[dateStr].push(record);
+                });
+
+                // 日付順にソート
+                const sortedDates = Object.keys(recordsByDate).sort();
+
+                // 各日の平均階数を計算
+                const labels = [];
+                const data = [];
+                const counts = [];
+
+                sortedDates.forEach(date => {
+                    const dayRecords = recordsByDate[date];
+                    const avgFloor = dayRecords.reduce((sum, record) => sum + record.floor, 0) / dayRecords.length;
+                    
+                    labels.push(new Date(date).toLocaleDateString('ja-JP', { month: 'short', day: 'numeric' }));
+                    data.push(avgFloor);
+                    counts.push(dayRecords.length);
+                });
+
+                // 既存のチャートを破棄
+                if (this.chart) {
+                    this.chart.destroy();
+                }
+
+                // 新しいチャートを作成
+                const ctx = document.getElementById('emotion-chart').getContext('2d');
+                this.chart = new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            label: '平均階数',
+                            data: data,
+                            borderColor: 'rgb(75, 192, 192)',
+                            backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                            tension: 0.1,
+                            yAxisID: 'y'
+                        }, {
+                            label: '記録回数',
+                            data: counts,
+                            borderColor: 'rgb(255, 99, 132)',
+                            backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                            tension: 0.1,
+                            yAxisID: 'y1',
+                            type: 'bar'
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        interaction: {
+                            mode: 'index',
+                            intersect: false,
+                        },
+                        plugins: {
+                            title: {
+                                display: true,
+                                text: `感情記録グラフ (${startDate.toLocaleDateString('ja-JP')} - ${endDate.toLocaleDateString('ja-JP')})`
+                            },
+                            legend: {
+                                display: true
+                            }
+                        },
+                        scales: {
+                            y: {
+                                type: 'linear',
+                                display: true,
+                                position: 'left',
+                                min: 1,
+                                max: 9,
+                                title: {
+                                    display: true,
+                                    text: '階数'
+                                }
+                            },
+                            y1: {
+                                type: 'linear',
+                                display: true,
+                                position: 'right',
+                                min: 0,
+                                title: {
+                                    display: true,
+                                    text: '記録回数'
+                                },
+                                grid: {
+                                    drawOnChartArea: false,
+                                },
+                            }
+                        }
+                    }
+                });
+
+                document.getElementById('download-graph-btn').style.display = 'inline-block';
+            }
+
+            downloadGraph() {
+                const graphContainer = document.getElementById('graph-container');
+                
+                html2canvas(graphContainer, {
+                    backgroundColor: '#ffffff',
+                    scale: 2,
+                    width: 800,
+                    height: 400
+                }).then(canvas => {
+                    const startDate = document.getElementById('start-date').value;
+                    const endDate = document.getElementById('end-date').value;
+                    const filename = `emotion-graph-${startDate}-to-${endDate}.png`;
+                    
+                    canvas.toBlob(blob => {
+                        const url = URL.createObjectURL(blob);
+                        const a = document.createElement('a');
+                        a.href = url;
+                        a.download = filename;
+                        document.body.appendChild(a);
+                        a.click();
+                        document.body.removeChild(a);
+                        URL.revokeObjectURL(url);
+                        
+                        this.showModal('ダウンロード完了', 'グラフ画像をダウンロードしました。');
+                    });
+                });
             }
 
             showConfirmDialog() {
