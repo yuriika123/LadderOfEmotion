@@ -19,12 +19,12 @@
 <body>
     <div class="app-container">
         <header class="app-header">
-            <h1>😊 感情の記録</h1>
+            <h1>Ladder of Emotion</h1>
             <p class="subtitle">あなたの今の状態を記録しましょう</p>
         </header>
 
         <!-- タブナビゲーション -->
-        <nav class="tab-nav">
+        <nav class="tab-nav redesigned">
             <button class="tab-btn active" data-tab="ladder">感情記録</button>
             <button class="tab-btn" data-tab="stats">統計</button>
             <button class="tab-btn" data-tab="history">履歴</button>
@@ -33,7 +33,7 @@
         <main class="main-content">
             <!-- 感情記録タブ -->
             <section class="ladder-section tab-content" data-tab-content="ladder">
-                <div class="ladder-container">
+                <div class="ladder-container redesigned">
                     <div class="ladder-button color-green" data-floor="9" data-description="腹足迷走神経系 - 最も安全で安心な状態">
                         <div class="button-content">
                             <span class="floor-number">9</span>
@@ -102,7 +102,6 @@
 
             <!-- 統計タブ -->
             <section class="stats-section tab-content" data-tab-content="stats" style="display:none;">
-                <h2>📊 統計</h2>
                 <div class="stats-grid">
                     <div class="stat-card">
                         <div class="stat-number" id="total-records">0</div>
@@ -122,8 +121,7 @@
             <!-- 履歴タブ -->
             <section class="history-section tab-content" data-tab-content="history" style="display:none;">
                 <div class="history-header">
-                    <h2>📝 記録履歴</h2>
-                    <div class="history-controls">
+                    <div class="history-controls center-controls">
                         <button id="graph-export-btn" class="control-btn">📊 グラフ出力</button>
                         <button id="export-btn" class="control-btn">📤 エクスポート</button>
                         <button id="import-btn" class="control-btn">📥 インポート</button>

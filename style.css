@@ -30,9 +30,12 @@
     --transition: all 0.2s ease-in-out;
 }
 
+body, .app-container, .main-content {
+    background: #fff !important;
+}
+
 body {
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     min-height: 100vh;
     color: var(--gray-800);
     line-height: 1.6;
@@ -58,6 +61,7 @@ body {
     font-weight: 700;
     margin-bottom: 8px;
     text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    color: #111;
 }
 
 .subtitle {
@@ -103,7 +107,7 @@ section h2 {
     border-radius: var(--border-radius-sm);
     padding: 20px;
     cursor: pointer;
-    transition: var(--transition);
+    transition: background 0.18s, color 0.18s;
     text-align: left;
     overflow: hidden;
     box-shadow: var(--shadow);
@@ -171,19 +175,21 @@ section h2 {
 
 /* ラダーボタンの色 */
 .color-green {
-    background: linear-gradient(135deg, var(--success-color), #059669);
+    background: #1db954;
+    color: #fff;
 }
 
 .color-green:hover {
-    background: linear-gradient(135deg, #059669, var(--success-color));
+    background: #119d3e;
 }
 
 .color-blue {
-    background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+    background: #1976d2;
+    color: #fff;
 }
 
-.color-blue:hover {
-    background: linear-gradient(135deg, var(--primary-dark), var(--primary-color));
+.color-blue:hover, .color-blue:active {
+    background: #0d47a1;
 }
 
 .color-gray {
@@ -218,7 +224,8 @@ section h2 {
 .stat-number {
     font-size: 2rem;
     font-weight: 700;
-    color: var(--primary-color);
+    color: #fff;
+    text-shadow: 0 1px 2px #000a;
     margin-bottom: 8px;
 }
 
@@ -279,27 +286,70 @@ section h2 {
 
 /* 検索 */
 .search-container {
-    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 0.7em;
+    margin: 1.2em 0 1.5em 0;
 }
 
-.search-input {
-    width: 100%;
-    padding: 12px 16px;
-    border: 2px solid var(--gray-200);
-    border-radius: var(--border-radius-sm);
-    font-size: 1rem;
-    transition: var(--transition);
-    background: white;
+.search-input, .filter-select {
+    border: none;
+    border-radius: 1.2em;
+    padding: 0.7em 1.1em;
+    font-size: 1em;
+    background: #f5f5f5;
+    color: #222;
+    box-shadow: 0 1px 4px #0001;
+    transition: background 0.2s, color 0.2s;
 }
 
-.search-input:focus {
-    outline: none;
-    border-color: var(--primary-color);
-    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+.search-input:focus, .filter-select:focus {
+    outline: 2px solid #1db954;
+    background: #fff;
 }
 
-.search-input::placeholder {
-    color: var(--gray-400);
+.filter-select {
+    min-width: 6em;
+}
+
+/* チェックボックスデザイン */
+#memo-filter {
+    accent-color: #1db954;
+    width: 1.1em;
+    height: 1.1em;
+    border-radius: 0.3em;
+    vertical-align: middle;
+    margin-right: 0.3em;
+}
+
+.search-container label {
+    font-size: 1em;
+    color: #222;
+    display: flex;
+    align-items: center;
+    gap: 0.3em;
+    cursor: pointer;
+}
+
+@media (prefers-color-scheme: dark) {
+    .search-input, .filter-select {
+        background: #232527;
+        color: #f5f5f5;
+        box-shadow: 0 1px 4px #0004;
+    }
+    .search-input:focus, .filter-select:focus {
+        background: #181a1b;
+        color: #fff;
+        outline: 2px solid #1db954;
+    }
+    .search-container label {
+        color: #f5f5f5;
+    }
+    #memo-filter {
+        accent-color: #1db954;
+        background: #232527;
+        border: 1px solid #444;
+    }
 }
 
 /* 履歴リスト */
@@ -800,4 +850,266 @@ input:focus {
     .tab-nav {
         gap: 4px;
     }
+}
+
+/* --- タブナビゲーション --- */
+.tab-nav.redesigned {
+  display: flex;
+  justify-content: space-around;
+  border-bottom: 2px solid #e0e0e0;
+  margin: 0 0 1.5em 0;
+  background: #fff;
+}
+.tab-btn {
+  flex: 1 1 0;
+  background: none;
+  border: none;
+  outline: none;
+  font-size: 1.1em;
+  font-weight: 500;
+  color: #888;
+  padding: 1em 0 0.7em 0;
+  cursor: pointer;
+  border-bottom: 3px solid transparent;
+  transition: color 0.2s, border-bottom 0.2s;
+}
+.tab-btn.active {
+  color: #2196f3;
+  font-weight: 700;
+  border-bottom: 3px solid #2196f3;
+  background: #f7fbff;
+}
+.tab-btn:hover:not(.active) {
+  color: #1976d2;
+  background: #f5f5f5;
+}
+
+/* --- 感情記録ボタン --- */
+.ladder-container.redesigned {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  margin: 0;
+  align-items: stretch;
+}
+.ladder-button {
+  width: 100%;
+  max-width: none;
+  border-radius: 0;
+  min-height: 4.5em;
+  margin: 0;
+  padding: 1.1em 0.5em;
+  box-sizing: border-box;
+}
+.ladder-button:first-child {
+  border-top-left-radius: 1.5em;
+  border-top-right-radius: 1.5em;
+}
+.ladder-button:last-child {
+  border-bottom-left-radius: 1.5em;
+  border-bottom-right-radius: 1.5em;
+}
+.ladder-button:not(:last-child) {
+  border-bottom: 2px solid #fff3;
+}
+@media (prefers-color-scheme: dark) {
+  .ladder-button:not(:last-child) {
+    border-bottom: 2px solid #333;
+  }
+}
+
+/* --- 階層ごとの色分け --- */
+.ladder-button.color-green {
+  background: #1db954;
+  color: #fff;
+}
+.ladder-button.color-green:hover, .ladder-button.color-green:active {
+  background: #119d3e;
+}
+.ladder-button.color-blue {
+  background: #1976d2;
+  color: #fff;
+}
+.ladder-button.color-blue:hover, .ladder-button.color-blue:active {
+  background: #0d47a1;
+}
+.ladder-button.color-gray {
+  background: #888888;
+  color: #fff;
+}
+.ladder-button.color-gray:hover, .ladder-button.color-gray:active {
+  background: #666666;
+}
+
+/* --- ボタン内テキスト --- */
+.button-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+}
+.floor-number {
+  font-size: 1.3em;
+  font-weight: 700;
+  margin-bottom: 0.1em;
+}
+.floor-title {
+  font-size: 1.1em;
+  font-weight: 600;
+  margin-bottom: 0.1em;
+}
+.floor-desc {
+  font-size: 0.97em;
+  color: #666;
+  margin-top: 0.1em;
+}
+
+/* --- レスポンシブ --- */
+@media (max-width: 600px) {
+  .ladder-button {
+    max-width: 98vw;
+    font-size: 1em;
+    padding: 1em 0.5em;
+  }
+  .tab-btn {
+    font-size: 1em;
+    padding: 0.9em 0 0.6em 0;
+  }
+}
+
+/* --- 全体余白・フォント --- */
+.app-header h1 {
+  font-size: 2.1em;
+  font-weight: 700;
+  margin: 1.2em 0 0.2em 0;
+  letter-spacing: 0.02em;
+}
+.subtitle {
+  color: #888;
+  font-size: 1.05em;
+  margin-bottom: 1.2em;
+}
+.main-content {
+  padding-bottom: 2em;
+}
+
+/* --- 既存のデザインを壊さないための調整 --- */
+.ladder-container {
+  width: 100%;
+}
+
+.ladder-button.color-gray .floor-title, .ladder-button.color-gray .floor-number {
+  color: #fff;
+  text-shadow: 0 1px 2px #000a;
+}
+
+.ladder-button.color-blue .floor-title, .ladder-button.color-blue .floor-number,
+.ladder-button.color-green .floor-title, .ladder-button.color-green .floor-number,
+.ladder-button.color-gray .floor-title, .ladder-button.color-gray .floor-number {
+  color: #fff;
+  text-shadow: 0 1px 2px #000a;
+}
+
+.ladder-button.color-gray .floor-desc,
+.ladder-button.color-blue .floor-desc,
+.ladder-button.color-green .floor-desc {
+  color: #fff;
+  text-shadow: 0 1px 2px #000a;
+}
+
+@media (prefers-color-scheme: dark) {
+  body, .app-container, .main-content, .ladder-section, .ladder-container.redesigned,
+  .stats-section, .history-section {
+    background: #232527 !important;
+  }
+  .main-content {
+    box-shadow: none;
+  }
+  .app-header h1 {
+    color: #fff;
+  }
+  .subtitle {
+    color: #bbb;
+  }
+  .tab-nav.redesigned {
+    background: #232527;
+    border-bottom: 2px solid #333;
+  }
+  .tab-btn {
+    color: #bbb;
+    background: none;
+  }
+  .tab-btn.active {
+    color: #90caf9;
+    background: #232527;
+    border-bottom: 3px solid #90caf9;
+  }
+  .tab-btn:hover:not(.active) {
+    color: #fff;
+    background: #232527;
+  }
+  .ladder-button.color-gray {
+    background: #444444;
+    color: #fff;
+  }
+  .ladder-button.color-gray:hover, .ladder-button.color-gray:active {
+    background: #666666;
+  }
+  .ladder-button.color-blue {
+    background: #1565c0;
+    color: #fff;
+  }
+  .ladder-button.color-blue:hover, .ladder-button.color-blue:active {
+    background: #003366;
+  }
+  .ladder-button.color-green {
+    background: linear-gradient(90deg, #1fd85c 0%, #1db954 100%);
+    color: #fff;
+  }
+  .ladder-button.color-green:hover, .ladder-button.color-green:active {
+    background: linear-gradient(90deg, #13b94a 0%, #119d3e 100%);
+  }
+  .ladder-button.color-gray .floor-title, .ladder-button.color-gray .floor-number,
+  .ladder-button.color-blue .floor-title, .ladder-button.color-blue .floor-number,
+  .ladder-button.color-green .floor-title, .ladder-button.color-green .floor-number,
+  .ladder-button.color-gray .floor-desc, .ladder-button.color-blue .floor-desc, .ladder-button.color-green .floor-desc {
+    color: #fff;
+    text-shadow: 0 1px 2px #000a;
+  }
+  .button-content {
+    color: #fff;
+  }
+  .stat-card, .history-item {
+    background: #232527;
+    color: #f5f5f5;
+    border-color: #333;
+  }
+  .search-input, .filter-select {
+    background: #232527;
+    color: #f5f5f5;
+    border: 1px solid #444;
+  }
+  .modal-content {
+    background: #232527;
+    color: #f5f5f5;
+  }
+  .btn-primary, .btn-secondary, .control-btn {
+    background: #333;
+    color: #fff;
+    border: 1px solid #444;
+  }
+  .btn-primary:hover, .btn-secondary:hover, .control-btn:hover {
+    background: #444;
+  }
+  .stat-number {
+    color: #fff;
+    text-shadow: 0 1px 2px #000a;
+  }
+}
+
+.history-controls.center-controls {
+  display: flex;
+  justify-content: center;
+  gap: 1em;
+  margin-bottom: 1.2em;
 }
