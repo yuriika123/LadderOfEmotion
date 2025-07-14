@@ -727,6 +727,7 @@ input:focus {
 .graph-container canvas {
     max-width: 100%;
     height: auto;
+    min-height: 300px;
 }
 
 .btn-secondary {
@@ -767,6 +768,12 @@ input:focus {
     .graph-container {
         padding: 16px;
         min-height: 300px;
+        height: 320px;
+    }
+    
+    .graph-container canvas {
+        min-height: 220px;
+        height: 220px !important;
     }
     
     .modal-actions {
@@ -786,7 +793,12 @@ input:focus {
     
     .graph-container {
         padding: 12px;
-        min-height: 250px;
+        min-height: 220px;
+        height: 240px;
+    }
+    .graph-container canvas {
+        min-height: 160px;
+        height: 160px !important;
     }
 }
 
@@ -820,5 +832,68 @@ input:focus {
     .btn-secondary:hover {
         background: var(--gray-600);
         border-color: var(--gray-500);
+    }
+}
+
+/* タブナビゲーション */
+.tab-nav {
+    display: flex;
+    justify-content: center;
+    gap: 16px;
+    margin-bottom: 32px;
+    background: rgba(99, 102, 241, 0.08);
+    border-radius: var(--border-radius);
+    padding: 8px 0;
+    box-shadow: var(--shadow-sm);
+}
+
+.tab-btn {
+    background: none;
+    border: none;
+    outline: none;
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--primary-color);
+    padding: 12px 32px;
+    border-radius: var(--border-radius-sm) var(--border-radius-sm) 0 0;
+    cursor: pointer;
+    transition: var(--transition);
+    position: relative;
+}
+
+.tab-btn.active,
+.tab-btn:hover {
+    background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+    color: white;
+    box-shadow: 0 2px 8px rgba(99,102,241,0.08);
+    z-index: 1;
+}
+
+.tab-btn:not(.active) {
+    background: none;
+    color: #2643a3;
+    opacity: 1;
+}
+
+@media (max-width: 600px) {
+    .tab-btn {
+        font-size: 1rem;
+        padding: 10px 12px;
+    }
+    .tab-nav {
+        gap: 4px;
+    }
+}
+
+@media (prefers-color-scheme: dark) {
+    .tab-btn {
+        color: #a5b4fc;
+    }
+    .tab-btn:not(.active) {
+        color: #dbeafe;
+    }
+    .tab-btn.active,
+    .tab-btn:hover {
+        color: #fff;
     }
 }

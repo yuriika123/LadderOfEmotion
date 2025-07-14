@@ -23,8 +23,16 @@
             <p class="subtitle">あなたの今の状態を記録しましょう</p>
         </header>
 
+        <!-- タブナビゲーション -->
+        <nav class="tab-nav">
+            <button class="tab-btn active" data-tab="ladder">感情記録</button>
+            <button class="tab-btn" data-tab="stats">統計</button>
+            <button class="tab-btn" data-tab="history">履歴</button>
+        </nav>
+
         <main class="main-content">
-            <section class="ladder-section">
+            <!-- 感情記録タブ -->
+            <section class="ladder-section tab-content" data-tab-content="ladder">
                 <div class="ladder-container">
                     <div class="ladder-button color-green" data-floor="9" data-description="腹足迷走神経系 - 最も安全で安心な状態">
                         <div class="button-content">
@@ -92,7 +100,8 @@
                 </div>
             </section>
 
-            <section class="stats-section">
+            <!-- 統計タブ -->
+            <section class="stats-section tab-content" data-tab-content="stats" style="display:none;">
                 <h2>📊 統計</h2>
                 <div class="stats-grid">
                     <div class="stat-card">
@@ -110,7 +119,8 @@
                 </div>
             </section>
 
-            <section class="history-section">
+            <!-- 履歴タブ -->
+            <section class="history-section tab-content" data-tab-content="history" style="display:none;">
                 <div class="history-header">
                     <h2>📝 記録履歴</h2>
                     <div class="history-controls">
@@ -833,6 +843,23 @@
         // アプリケーションを初期化
         document.addEventListener('DOMContentLoaded', () => {
             new EmotionApp();
+            // タブ切り替え
+            const tabBtns = document.querySelectorAll('.tab-btn');
+            const tabContents = document.querySelectorAll('.tab-content');
+            tabBtns.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    tabBtns.forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    const tab = btn.getAttribute('data-tab');
+                    tabContents.forEach(content => {
+                        if(content.getAttribute('data-tab-content') === tab) {
+                            content.style.display = '';
+                        } else {
+                            content.style.display = 'none';
+                        }
+                    });
+                });
+            });
         });
     </script>
 </body>
