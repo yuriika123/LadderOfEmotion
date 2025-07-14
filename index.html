@@ -21,13 +21,6 @@
         <header class="app-header">
             <h1>😊 感情の記録</h1>
             <p class="subtitle">あなたの今の状態を記録しましょう</p>
-            <div class="theme-toggle-container">
-                <label class="theme-switch">
-                    <input type="checkbox" id="theme-toggle">
-                    <span class="slider"></span>
-                </label>
-                <span id="theme-label" style="font-size:0.95em;">ダークモード</span>
-            </div>
         </header>
 
         <!-- タブナビゲーション -->
@@ -365,34 +358,6 @@
         class UIManager {
             constructor() {
                 this.modalConfirmCallback = null;
-                this.initTheme();
-            }
-
-            initTheme() {
-                const themeToggle = document.getElementById('theme-toggle');
-                const themeLabel = document.getElementById('theme-label');
-                // 初期状態
-                const savedTheme = localStorage.getItem('theme-mode');
-                if (savedTheme === 'dark') {
-                    document.documentElement.classList.add('dark');
-                    themeToggle.checked = true;
-                    themeLabel.textContent = 'ダークモード';
-                } else {
-                    document.documentElement.classList.remove('dark');
-                    themeToggle.checked = false;
-                    themeLabel.textContent = 'ライトモード';
-                }
-                themeToggle.addEventListener('change', () => {
-                    if (themeToggle.checked) {
-                        document.documentElement.classList.add('dark');
-                        localStorage.setItem('theme-mode', 'dark');
-                        themeLabel.textContent = 'ダークモード';
-                    } else {
-                        document.documentElement.classList.remove('dark');
-                        localStorage.setItem('theme-mode', 'light');
-                        themeLabel.textContent = 'ライトモード';
-                    }
-                });
             }
 
             updateStats(records) {
