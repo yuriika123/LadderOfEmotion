@@ -10,6 +10,9 @@
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>😊</text></svg>">
     <!-- Chart.js CDN -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Chart.js timeスケール用 luxonアダプタ -->
+    <script src="https://cdn.jsdelivr.net/npm/luxon@3.4.4/build/global/luxon.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-luxon@1.3.1/dist/chartjs-adapter-luxon.umd.min.js"></script>
     <!-- html2canvas CDN -->
     <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
 </head>
@@ -113,6 +116,8 @@
                     <div class="history-controls">
                         <button id="graph-export-btn" class="control-btn">📊 グラフ出力</button>
                         <button id="export-btn" class="control-btn">📤 エクスポート</button>
+                        <button id="import-btn" class="control-btn">📥 インポート</button>
+                        <input type="file" id="import-file" accept=".csv" style="display:none;" />
                         <button id="clear-btn" class="control-btn danger">🗑️ クリア</button>
                     </div>
                 </div>
@@ -131,12 +136,12 @@
             <h3>📊 グラフ出力</h3>
             <div class="date-range-container">
                 <div class="date-input-group">
-                    <label for="start-date">開始日:</label>
-                    <input type="date" id="start-date" class="date-input">
+                    <label for="start-date">開始日時:</label>
+                    <input type="datetime-local" id="start-date" class="date-input">
                 </div>
                 <div class="date-input-group">
-                    <label for="end-date">終了日:</label>
-                    <input type="date" id="end-date" class="date-input">
+                    <label for="end-date">終了日時:</label>
+                    <input type="datetime-local" id="end-date" class="date-input">
                 </div>
             </div>
             <div class="graph-container" id="graph-container">
@@ -158,6 +163,20 @@
             <p id="modal-message"></p>
             <div class="modal-actions">
                 <button id="modal-ok" class="btn-primary">OK</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- メモ入力モーダル -->
+    <div id="memo-modal" class="modal">
+        <div class="modal-content">
+            <span class="close" id="memo-modal-close">&times;</span>
+            <h3 id="memo-modal-title">メモを入力</h3>
+            <p id="memo-modal-desc"></p>
+            <textarea id="memo-input" rows="4" placeholder="メモ（任意）" style="width:100%;margin-top:1em;"></textarea>
+            <div class="modal-actions">
+                <button id="memo-cancel" class="btn-secondary">キャンセル</button>
+                <button id="memo-ok" class="btn-primary">記録する</button>
             </div>
         </div>
     </div>
@@ -209,9 +228,13 @@
             setDefaultDates() {
                 const today = new Date();
                 const oneWeekAgo = new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000);
-                
-                document.getElementById('end-date').value = today.toISOString().split('T')[0];
-                document.getElementById('start-date').value = oneWeekAgo.toISOString().split('T')[0];
+                // datetime-local用のフォーマット YYYY-MM-DDTHH:MM
+                const toDatetimeLocal = d => {
+                    const pad = n => n.toString().padStart(2, '0');
+                    return d.getFullYear() + '-' + pad(d.getMonth()+1) + '-' + pad(d.getDate()) + 'T' + pad(d.getHours()) + ':' + pad(d.getMinutes());
+                };
+                document.getElementById('end-date').value = toDatetimeLocal(today);
+                document.getElementById('start-date').value = toDatetimeLocal(oneWeekAgo);
             }
 
             setupEventListeners() {
@@ -263,55 +286,94 @@
                     this.downloadGraph();
                 });
 
-                // モーダル
-                document.querySelector('.close').addEventListener('click', () => {
-                    this.hideModal();
+                // モーダルのバツボタン（.close）全てにイベント付与
+                document.querySelectorAll('.close').forEach(closeBtn => {
+                    closeBtn.addEventListener('click', (e) => {
+                        // 親の.modalを閉じる
+                        let modal = closeBtn.closest('.modal');
+                        if (modal) modal.style.display = 'none';
+                    });
                 });
 
-                document.getElementById('modal-ok').addEventListener('click', () => {
-                    this.hideModal();
+                // メモモーダル
+                document.getElementById('memo-modal-close').addEventListener('click', () => {
+                    this.hideMemoModal();
+                });
+                document.getElementById('memo-cancel').addEventListener('click', () => {
+                    this.hideMemoModal();
+                });
+                document.getElementById('memo-ok').addEventListener('click', () => {
+                    this.saveMemoRecord();
+                });
+
+                // インポート機能
+                document.getElementById('import-btn').addEventListener('click', () => {
+                    document.getElementById('import-file').click();
+                });
+                document.getElementById('import-file').addEventListener('change', (e) => {
+                    const file = e.target.files[0];
+                    if (file) {
+                        this.importCSV(file);
+                    }
+                    e.target.value = '';
                 });
 
                 // モーダル外クリックで閉じる
                 window.addEventListener('click', (e) => {
                     const modal = document.getElementById('modal');
                     const graphModal = document.getElementById('graph-modal');
+                    const memoModal = document.getElementById('memo-modal');
                     if (e.target === modal) {
                         this.hideModal();
                     }
                     if (e.target === graphModal) {
                         this.hideGraphModal();
                     }
+                    if (e.target === memoModal) {
+                        this.hideMemoModal();
+                    }
                 });
             }
 
             handleLadderClick(event) {
                 const button = event.currentTarget;
-                const floor = parseInt(button.dataset.floor, 10);
-                const description = button.dataset.description;
-
-                const newRecord = {
-                    floor: floor,
-                    timestamp: new Date(),
-                    description: description
-                };
-
-                this.records.unshift(newRecord); // 新しい記録を先頭に追加
-                this.filteredRecords.unshift(newRecord);
-                this.saveData();
-                this.updateUI();
-
-                // 成功メッセージを表示
-                this.showModal(
-                    '記録完了',
-                    `${floor}階「${description.split(' - ')[0]}」を記録しました。`
-                );
-
-                // ボタンのアニメーション
+                this.selectedFloor = parseInt(button.dataset.floor, 10);
+                this.selectedDescription = button.dataset.description;
+                // メモモーダルに内容セット
+                document.getElementById('memo-modal-title').textContent = `${this.selectedFloor}階の記録`;
+                document.getElementById('memo-modal-desc').textContent = this.selectedDescription;
+                document.getElementById('memo-input').value = '';
+                document.getElementById('memo-modal').style.display = 'block';
+                // ボタンアニメーション
                 button.classList.add('clicked');
                 setTimeout(() => {
                     button.classList.remove('clicked');
                 }, 200);
+            }
+
+            saveMemoRecord() {
+                const memo = document.getElementById('memo-input').value;
+                const floor = this.selectedFloor;
+                const description = this.selectedDescription;
+                const newRecord = {
+                    floor: floor,
+                    timestamp: new Date(),
+                    description: description,
+                    memo: memo
+                };
+                this.records.unshift(newRecord);
+                this.filteredRecords.unshift(newRecord);
+                this.saveData();
+                this.updateUI();
+                this.hideMemoModal();
+                this.showModal(
+                    '記録完了',
+                    `${floor}階「${description.split(' - ')[0]}」を記録しました。${memo ? '\nメモ: ' + memo : ''}`
+                );
+            }
+
+            hideMemoModal() {
+                document.getElementById('memo-modal').style.display = 'none';
             }
 
             filterRecords(searchTerm) {
@@ -365,10 +427,9 @@
                     return;
                 }
 
-                this.filteredRecords.forEach(record => {
+                this.filteredRecords.forEach((record, idx) => {
                     const recordElement = document.createElement('div');
                     recordElement.classList.add('history-item');
-                    
                     const formattedDate = new Intl.DateTimeFormat('ja-JP', {
                         year: 'numeric',
                         month: 'long',
@@ -376,19 +437,52 @@
                         hour: '2-digit',
                         minute: '2-digit'
                     }).format(record.timestamp);
-
                     const floorClass = this.getFloorClass(record.floor);
-
                     recordElement.innerHTML = `
                         <div class="history-info">
                             <div class="history-floor ${floorClass}">${record.floor}階</div>
                             <div class="history-description">${record.description || ''}</div>
+                            ${record.memo ? `<div class='history-memo'>📝 ${record.memo}</div>` : ''}
                         </div>
                         <div class="history-time">${formattedDate}</div>
                     `;
-
+                    // 長押し削除対応
+                    let pressTimer = null;
+                    const startPress = (e) => {
+                        e.preventDefault();
+                        pressTimer = setTimeout(() => {
+                            this.confirmDeleteRecord(record);
+                        }, 700); // 700ms長押し
+                    };
+                    const cancelPress = () => {
+                        clearTimeout(pressTimer);
+                    };
+                    recordElement.addEventListener('mousedown', startPress);
+                    recordElement.addEventListener('touchstart', startPress);
+                    recordElement.addEventListener('mouseup', cancelPress);
+                    recordElement.addEventListener('mouseleave', cancelPress);
+                    recordElement.addEventListener('touchend', cancelPress);
+                    recordElement.addEventListener('touchcancel', cancelPress);
                     historyList.appendChild(recordElement);
                 });
+            }
+
+            confirmDeleteRecord(record) {
+                this.showModal(
+                    '記録削除',
+                    'この記録を削除しますか？',
+                    true,
+                    () => this.deleteRecord(record)
+                );
+            }
+
+            deleteRecord(record) {
+                // records/filteredRecords両方から削除
+                this.records = this.records.filter(r => r !== record);
+                this.filteredRecords = this.filteredRecords.filter(r => r !== record);
+                this.saveData();
+                this.updateUI();
+                this.showModal('削除完了', '記録を削除しました。');
             }
 
             getFloorClass(floor) {
@@ -398,31 +492,37 @@
             }
 
             exportData() {
-                const data = {
-                    records: this.records,
-                    exportDate: new Date().toISOString(),
-                    totalRecords: this.records.length
-                };
-
-                const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+                // CSVヘッダー
+                const header = ['日時', '階数', '説明', 'メモ'];
+                // レコードをCSV行に変換
+                const rows = this.records.map(record => {
+                    const date = new Date(record.timestamp);
+                    const dateStr = date.toLocaleString('ja-JP', { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', second: '2-digit' });
+                    // CSV用にエスケープ
+                    const escape = v => '"' + (v ? String(v).replace(/"/g, '""') : '') + '"';
+                    return [
+                        escape(dateStr),
+                        escape(record.floor),
+                        escape(record.description),
+                        escape(record.memo)
+                    ].join(',');
+                });
+                const csv = [header.join(','), ...rows].join('\r\n');
+                const blob = new Blob([csv], { type: 'text/csv' });
                 const url = URL.createObjectURL(blob);
                 const a = document.createElement('a');
                 a.href = url;
-                a.download = `emotion-records-${new Date().toISOString().split('T')[0]}.json`;
-                
+                a.download = `emotion-records-${new Date().toISOString().split('T')[0]}.csv`;
                 // iOS Safari対応
                 if (navigator.userAgent.match(/iPad|iPhone|iPod/)) {
-                    // iOS Safariでは新しいタブで開く
                     window.open(url, '_blank');
                     this.showModal('エクスポート完了', 'データを新しいタブで開きました。手動でダウンロードしてください。');
                 } else {
-                    // その他のブラウザでは通常通りダウンロード
                     document.body.appendChild(a);
                     a.click();
                     document.body.removeChild(a);
-                    this.showModal('エクスポート完了', 'データをエクスポートしました。');
+                    this.showModal('エクスポート完了', 'データをCSVでエクスポートしました。');
                 }
-                
                 URL.revokeObjectURL(url);
             }
 
@@ -441,60 +541,52 @@
             }
 
             generateGraph() {
-                const startDate = new Date(document.getElementById('start-date').value);
-                const endDate = new Date(document.getElementById('end-date').value);
-                
+                // datetime-localの値をDate型に変換
+                const startDateStr = document.getElementById('start-date').value;
+                const endDateStr = document.getElementById('end-date').value;
+                const startDate = startDateStr ? new Date(startDateStr) : new Date();
+                const endDate = endDateStr ? new Date(endDateStr) : new Date();
                 if (startDate > endDate) {
                     this.showModal('エラー', '開始日は終了日より前の日付を選択してください。');
                     return;
                 }
-
                 // 日付範囲内の記録をフィルタリング
                 const filteredRecords = this.records.filter(record => {
                     const recordDate = new Date(record.timestamp);
                     return recordDate >= startDate && recordDate <= endDate;
                 });
-
                 if (filteredRecords.length === 0) {
                     this.showModal('エラー', '指定された期間に記録がありません。');
                     return;
                 }
-
-                // 記録ごとにラベル（時刻 or 日付＋時刻）を作成
-                const isSingleDay = startDate.toDateString() === endDate.toDateString();
-                const labels = [];
-                const data = [];
-                filteredRecords.sort((a, b) => a.timestamp - b.timestamp); // 時系列順
-                filteredRecords.forEach(record => {
-                    const date = new Date(record.timestamp);
-                    let label = '';
-                    if (isSingleDay) {
-                        label = date.toLocaleTimeString('ja-JP', { hour: '2-digit', minute: '2-digit' });
-                    } else {
-                        label = date.toLocaleDateString('ja-JP', { month: 'short', day: 'numeric' }) + ' ' + date.toLocaleTimeString('ja-JP', { hour: '2-digit', minute: '2-digit' });
-                    }
-                    labels.push(label);
-                    data.push(record.floor);
-                });
-
+                // 記録を時系列でソート
+                filteredRecords.sort((a, b) => a.timestamp - b.timestamp);
+                // Chart.jsのtimeスケール用データ生成
+                const data = filteredRecords.map(record => ({
+                    x: new Date(record.timestamp),
+                    y: record.floor
+                }));
+                const firstTime = new Date(filteredRecords[0].timestamp);
+                const lastTime = new Date(filteredRecords[filteredRecords.length - 1].timestamp);
                 // 既存のチャートを破棄
                 if (this.chart) {
                     this.chart.destroy();
                 }
-
                 // 新しいチャートを作成
                 const ctx = document.getElementById('emotion-chart').getContext('2d');
                 this.chart = new Chart(ctx, {
                     type: 'line',
                     data: {
-                        labels: labels,
                         datasets: [{
                             label: '階数',
                             data: data,
                             borderColor: 'rgb(75, 192, 192)',
                             backgroundColor: 'rgba(75, 192, 192, 0.2)',
                             tension: 0.1,
-                            yAxisID: 'y'
+                            yAxisID: 'y',
+                            spanGaps: true,
+                            showLine: true,
+                            pointRadius: 4
                         }]
                     },
                     options: {
@@ -506,13 +598,30 @@
                         plugins: {
                             title: {
                                 display: true,
-                                text: `感情記録グラフ（${startDate.toLocaleDateString('ja-JP')}${isSingleDay ? '' : ' - ' + endDate.toLocaleDateString('ja-JP')}}）`
+                                text: `感情記録グラフ（${firstTime.toLocaleString('ja-JP')} - ${lastTime.toLocaleString('ja-JP')})`
                             },
                             legend: {
                                 display: true
                             }
                         },
                         scales: {
+                            x: {
+                                type: 'time',
+                                time: {
+                                    tooltipFormat: 'MM/dd HH:mm',
+                                    displayFormats: {
+                                        minute: 'MM/dd HH:mm',
+                                        hour: 'MM/dd HH:mm',
+                                        day: 'MM/dd',
+                                    }
+                                },
+                                title: {
+                                    display: true,
+                                    text: '日時'
+                                },
+                                min: firstTime,
+                                max: lastTime
+                            },
                             y: {
                                 type: 'linear',
                                 display: true,
@@ -527,28 +636,45 @@
                         }
                     }
                 });
-
                 document.getElementById('download-graph-btn').style.display = 'inline-block';
             }
 
             downloadGraph() {
                 const graphContainer = document.getElementById('graph-container');
+                // グラフのfirstTime/lastTimeを取得
+                let firstTime = null, lastTime = null;
+                if (this.chart && this.chart.data && this.chart.data.datasets[0] && this.chart.data.datasets[0].data.length > 0) {
+                    const dataArr = this.chart.data.datasets[0].data;
+                    firstTime = dataArr[0].x instanceof Date ? dataArr[0].x : new Date(dataArr[0].x);
+                    lastTime = dataArr[dataArr.length-1].x instanceof Date ? dataArr[dataArr.length-1].x : new Date(dataArr[dataArr.length-1].x);
+                }
+                // 日付フォーマット YYYYMMDD_HHmm
+                const format = d => {
+                    const pad = n => n.toString().padStart(2, '0');
+                    return d.getFullYear() + pad(d.getMonth()+1) + pad(d.getDate()) + '_' + pad(d.getHours()) + pad(d.getMinutes());
+                };
                 html2canvas(graphContainer, {
                     backgroundColor: '#ffffff',
                     scale: 2,
                     width: 800,
                     height: 400
                 }).then(canvas => {
-                    // 画像をimg要素でポップアップ表示
                     const imgDataUrl = canvas.toDataURL('image/png');
                     const modal = document.createElement('div');
                     modal.className = 'modal';
                     modal.style.display = 'block';
+                    // ファイル名生成
+                    let filename = '感情記録グラフ';
+                    if (firstTime && lastTime) {
+                        filename += `[${format(firstTime)}]-[${format(lastTime)}]`;
+                    }
+                    filename += '.png';
                     modal.innerHTML = `
                         <div class="modal-content" style="max-width:90vw;max-height:90vh;overflow:auto;text-align:center;">
                             <span class="close" id="img-modal-close" style="font-size:2rem;cursor:pointer;float:right;">&times;</span>
                             <h3>グラフ画像</h3>
                             <p style="font-size:0.95em;">画像を長押しして保存できます（iPhone/Android対応）</p>
+                            <a id="img-download-link" href="${imgDataUrl}" download="${filename}" style="display:inline-block;margin-bottom:1em;">⬇️ 画像をダウンロード</a>
                             <img src="${imgDataUrl}" alt="グラフ画像" style="max-width:100%;height:auto;border-radius:8px;box-shadow:0 2px 8px #0002;" />
                         </div>
                     `;
@@ -556,7 +682,6 @@
                     document.getElementById('img-modal-close').onclick = () => {
                         document.body.removeChild(modal);
                     };
-                    // モーダル外クリックで閉じる
                     modal.onclick = (e) => {
                         if (e.target === modal) {
                             document.body.removeChild(modal);
@@ -581,16 +706,15 @@
                 this.showModal('削除完了', 'すべての記録を削除しました。');
             }
 
-            showModal(title, message, isConfirm = false) {
+            showModal(title, message, isConfirm = false, onConfirm = null) {
                 document.getElementById('modal-title').textContent = title;
                 document.getElementById('modal-message').textContent = message;
-                
                 const okButton = document.getElementById('modal-ok');
                 if (isConfirm) {
                     okButton.textContent = '削除する';
                     okButton.className = 'btn-danger';
                     okButton.onclick = () => {
-                        this.clearAllRecords();
+                        if (onConfirm) onConfirm();
                         this.hideModal();
                     };
                 } else {
@@ -598,12 +722,77 @@
                     okButton.className = 'btn-primary';
                     okButton.onclick = () => this.hideModal();
                 }
-
                 document.getElementById('modal').style.display = 'block';
             }
 
             hideModal() {
                 document.getElementById('modal').style.display = 'none';
+            }
+
+            importCSV(file) {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    const text = e.target.result;
+                    const lines = text.split(/\r?\n/).filter(line => line.trim());
+                    if (lines.length < 2) {
+                        this.showModal('インポート失敗', 'CSVファイルに有効なデータがありません。');
+                        return;
+                    }
+                    const header = lines[0].split(',');
+                    const idx = {
+                        date: header.findIndex(h => h.includes('日時')),
+                        floor: header.findIndex(h => h.includes('階数')),
+                        desc: header.findIndex(h => h.includes('説明')),
+                        memo: header.findIndex(h => h.includes('メモ'))
+                    };
+                    if (idx.date < 0 || idx.floor < 0) {
+                        this.showModal('インポート失敗', 'CSVヘッダーが不正です。');
+                        return;
+                    }
+                    let imported = 0;
+                    for (let i = 1; i < lines.length; i++) {
+                        const cols = this.parseCSVLine(lines[i]);
+                        if (!cols[idx.date] || !cols[idx.floor]) continue;
+                        const record = {
+                            timestamp: new Date(cols[idx.date]),
+                            floor: parseInt(cols[idx.floor], 10),
+                            description: cols[idx.desc] || '',
+                            memo: cols[idx.memo] || ''
+                        };
+                        this.records.push(record);
+                        imported++;
+                    }
+                    this.filteredRecords = [...this.records];
+                    this.saveData();
+                    this.updateUI();
+                    this.showModal('インポート完了', `${imported}件の記録をインポートしました。`);
+                };
+                reader.readAsText(file);
+            }
+
+            parseCSVLine(line) {
+                // "で囲まれたカンマを考慮して分割
+                const result = [];
+                let current = '';
+                let inQuotes = false;
+                for (let i = 0; i < line.length; i++) {
+                    const char = line[i];
+                    if (char === '"') {
+                        if (inQuotes && line[i+1] === '"') {
+                            current += '"';
+                            i++;
+                        } else {
+                            inQuotes = !inQuotes;
+                        }
+                    } else if (char === ',' && !inQuotes) {
+                        result.push(current);
+                        current = '';
+                    } else {
+                        current += char;
+                    }
+                }
+                result.push(current);
+                return result;
             }
         }
 
