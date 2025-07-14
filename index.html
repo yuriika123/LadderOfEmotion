@@ -460,31 +460,21 @@
                     return;
                 }
 
-                // 日付ごとに記録をグループ化
-                const recordsByDate = {};
-                filteredRecords.forEach(record => {
-                    const dateStr = record.timestamp.toISOString().split('T')[0];
-                    if (!recordsByDate[dateStr]) {
-                        recordsByDate[dateStr] = [];
-                    }
-                    recordsByDate[dateStr].push(record);
-                });
-
-                // 日付順にソート
-                const sortedDates = Object.keys(recordsByDate).sort();
-
-                // 各日の平均階数を計算
+                // 記録ごとにラベル（時刻 or 日付＋時刻）を作成
+                const isSingleDay = startDate.toDateString() === endDate.toDateString();
                 const labels = [];
                 const data = [];
-                const counts = [];
-
-                sortedDates.forEach(date => {
-                    const dayRecords = recordsByDate[date];
-                    const avgFloor = dayRecords.reduce((sum, record) => sum + record.floor, 0) / dayRecords.length;
-                    
-                    labels.push(new Date(date).toLocaleDateString('ja-JP', { month: 'short', day: 'numeric' }));
-                    data.push(avgFloor);
-                    counts.push(dayRecords.length);
+                filteredRecords.sort((a, b) => a.timestamp - b.timestamp); // 時系列順
+                filteredRecords.forEach(record => {
+                    const date = new Date(record.timestamp);
+                    let label = '';
+                    if (isSingleDay) {
+                        label = date.toLocaleTimeString('ja-JP', { hour: '2-digit', minute: '2-digit' });
+                    } else {
+                        label = date.toLocaleDateString('ja-JP', { month: 'short', day: 'numeric' }) + ' ' + date.toLocaleTimeString('ja-JP', { hour: '2-digit', minute: '2-digit' });
+                    }
+                    labels.push(label);
+                    data.push(record.floor);
                 });
 
                 // 既存のチャートを破棄
@@ -499,20 +489,12 @@
                     data: {
                         labels: labels,
                         datasets: [{
-                            label: '平均階数',
+                            label: '階数',
                             data: data,
                             borderColor: 'rgb(75, 192, 192)',
                             backgroundColor: 'rgba(75, 192, 192, 0.2)',
                             tension: 0.1,
                             yAxisID: 'y'
-                        }, {
-                            label: '記録回数',
-                            data: counts,
-                            borderColor: 'rgb(255, 99, 132)',
-                            backgroundColor: 'rgba(255, 99, 132, 0.2)',
-                            tension: 0.1,
-                            yAxisID: 'y1',
-                            type: 'bar'
                         }]
                     },
                     options: {
@@ -524,7 +506,7 @@
                         plugins: {
                             title: {
                                 display: true,
-                                text: `感情記録グラフ (${startDate.toLocaleDateString('ja-JP')} - ${endDate.toLocaleDateString('ja-JP')})`
+                                text: `感情記録グラフ（${startDate.toLocaleDateString('ja-JP')}${isSingleDay ? '' : ' - ' + endDate.toLocaleDateString('ja-JP')}}）`
                             },
                             legend: {
                                 display: true
@@ -541,19 +523,6 @@
                                     display: true,
                                     text: '階数'
                                 }
-                            },
-                            y1: {
-                                type: 'linear',
-                                display: true,
-                                position: 'right',
-                                min: 0,
-                                title: {
-                                    display: true,
-                                    text: '記録回数'
-                                },
-                                grid: {
-                                    drawOnChartArea: false,
-                                },
                             }
                         }
                     }
@@ -564,38 +533,35 @@
 
             downloadGraph() {
                 const graphContainer = document.getElementById('graph-container');
-                
                 html2canvas(graphContainer, {
                     backgroundColor: '#ffffff',
                     scale: 2,
                     width: 800,
                     height: 400
                 }).then(canvas => {
-                    const startDate = document.getElementById('start-date').value;
-                    const endDate = document.getElementById('end-date').value;
-                    const filename = `emotion-graph-${startDate}-to-${endDate}.png`;
-                    
-                    canvas.toBlob(blob => {
-                        const url = URL.createObjectURL(blob);
-                        const a = document.createElement('a');
-                        a.href = url;
-                        a.download = filename;
-                        
-                        // iOS Safari対応
-                        if (navigator.userAgent.match(/iPad|iPhone|iPod/)) {
-                            // iOS Safariでは新しいタブで開く
-                            window.open(url, '_blank');
-                            this.showModal('ダウンロード完了', 'グラフ画像を新しいタブで開きました。手動で保存してください。');
-                        } else {
-                            // その他のブラウザでは通常通りダウンロード
-                            document.body.appendChild(a);
-                            a.click();
-                            document.body.removeChild(a);
-                            this.showModal('ダウンロード完了', 'グラフ画像をダウンロードしました。');
+                    // 画像をimg要素でポップアップ表示
+                    const imgDataUrl = canvas.toDataURL('image/png');
+                    const modal = document.createElement('div');
+                    modal.className = 'modal';
+                    modal.style.display = 'block';
+                    modal.innerHTML = `
+                        <div class="modal-content" style="max-width:90vw;max-height:90vh;overflow:auto;text-align:center;">
+                            <span class="close" id="img-modal-close" style="font-size:2rem;cursor:pointer;float:right;">&times;</span>
+                            <h3>グラフ画像</h3>
+                            <p style="font-size:0.95em;">画像を長押しして保存できます（iPhone/Android対応）</p>
+                            <img src="${imgDataUrl}" alt="グラフ画像" style="max-width:100%;height:auto;border-radius:8px;box-shadow:0 2px 8px #0002;" />
+                        </div>
+                    `;
+                    document.body.appendChild(modal);
+                    document.getElementById('img-modal-close').onclick = () => {
+                        document.body.removeChild(modal);
+                    };
+                    // モーダル外クリックで閉じる
+                    modal.onclick = (e) => {
+                        if (e.target === modal) {
+                            document.body.removeChild(modal);
                         }
-                        
-                        URL.revokeObjectURL(url);
-                    });
+                    };
                 });
             }
 
