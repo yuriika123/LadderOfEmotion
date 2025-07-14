@@ -123,6 +123,21 @@
                 </div>
                 <div class="search-container">
                     <input type="text" id="search-input" placeholder="日付や階数で検索..." class="search-input">
+                    <select id="floor-filter" class="filter-select" style="margin-left:8px;">
+                        <option value="">全ての階数</option>
+                        <option value="9">9階</option>
+                        <option value="8">8階</option>
+                        <option value="7">7階</option>
+                        <option value="6">6階</option>
+                        <option value="5">5階</option>
+                        <option value="4">4階</option>
+                        <option value="3">3階</option>
+                        <option value="2">2階</option>
+                        <option value="1">1階</option>
+                    </select>
+                    <label style="margin-left:8px;font-size:0.95em;">
+                        <input type="checkbox" id="memo-filter" style="vertical-align:middle;"> メモありのみ
+                    </label>
                 </div>
                 <div id="history-list" class="history-list"></div>
             </section>
@@ -250,8 +265,16 @@
                 });
 
                 // 検索機能
-                document.getElementById('search-input').addEventListener('input', (e) => {
-                    this.filterRecords(e.target.value);
+                document.getElementById('search-input').addEventListener('input', () => {
+                    this.filterRecords();
+                });
+                // 階数フィルタ
+                document.getElementById('floor-filter').addEventListener('change', () => {
+                    this.filterRecords();
+                });
+                // メモありフィルタ
+                document.getElementById('memo-filter').addEventListener('change', () => {
+                    this.filterRecords();
                 });
 
                 // エクスポート機能
@@ -376,22 +399,33 @@
                 document.getElementById('memo-modal').style.display = 'none';
             }
 
-            filterRecords(searchTerm) {
-                if (!searchTerm.trim()) {
-                    this.filteredRecords = [...this.records];
-                } else {
-                    this.filteredRecords = this.records.filter(record => {
-                        const dateStr = record.timestamp.toLocaleDateString('ja-JP');
-                        const timeStr = record.timestamp.toLocaleTimeString('ja-JP');
-                        const floorStr = record.floor.toString();
-                        const descStr = record.description || '';
-                        
-                        return dateStr.includes(searchTerm) || 
-                               timeStr.includes(searchTerm) || 
-                               floorStr.includes(searchTerm) ||
-                               descStr.toLowerCase().includes(searchTerm.toLowerCase());
-                    });
-                }
+            filterRecords() {
+                const searchTerm = document.getElementById('search-input').value;
+                const floorValue = document.getElementById('floor-filter').value;
+                const memoOnly = document.getElementById('memo-filter').checked;
+                this.filteredRecords = this.records.filter(record => {
+                    // 検索ワード
+                    const dateStr = record.timestamp.toLocaleDateString('ja-JP');
+                    const timeStr = record.timestamp.toLocaleTimeString('ja-JP');
+                    const floorStr = record.floor.toString();
+                    const descStr = record.description || '';
+                    const memoStr = record.memo || '';
+                    let match = true;
+                    if (searchTerm.trim()) {
+                        match = dateStr.includes(searchTerm) ||
+                                timeStr.includes(searchTerm) ||
+                                floorStr.includes(searchTerm) ||
+                                descStr.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                                memoStr.toLowerCase().includes(searchTerm.toLowerCase());
+                    }
+                    if (match && floorValue) {
+                        match = record.floor.toString() === floorValue;
+                    }
+                    if (match && memoOnly) {
+                        match = !!record.memo && record.memo.trim() !== '';
+                    }
+                    return match;
+                });
                 this.updateHistoryView();
             }
 
