@@ -793,13 +793,13 @@ input:focus {
     
     .graph-container {
         padding: 12px;
-        min-height: 40vw;
+        min-height: 60vw;
         height: auto;
     }
     .graph-container canvas {
-        min-height: 30vw;
-        height: auto !important;
-        max-height: 60vw;
+        min-height: 40vw;
+        height: 100% !important;
+        max-height: 80vw;
     }
 }
 
